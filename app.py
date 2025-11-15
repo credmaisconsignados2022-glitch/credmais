@@ -1020,6 +1020,25 @@ def request_entity_too_large(error):
     flash("Arquivo muito grande. Limite 10MB.", "danger")
     return redirect(request.referrer or url_for("clientes_view"))
 
+# === CRIAR ADMIN SE NAO EXISTE ===
+from werkzeug.security import generate_password_hash
+admin_email = "credmaisconsignados2022@gmail.com"
+admin_senha = "Latoya2019!"
+
+existe = User.query.filter_by(email=admin_email).first()
+if not existe:
+    novo = User(
+        nome="Admin",
+        email=admin_email,
+        password=generate_password_hash(admin_senha),
+        primeiro_acesso=False,
+        bloqueado=False
+    )
+    db.session.add(novo)
+    db.session.commit()
+    print("### ADMIN CRIADO NO SISTEMA ###")
+else:
+    print("### ADMIN JÁ EXISTE ###")
 
 # ===========================
 # EXECUÇÃO FINAL
