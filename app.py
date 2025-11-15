@@ -132,6 +132,7 @@ def soma_status(usuario_id, status, is_admin=False):
 def ensure_admin():
     admin_email = "credmaisconsignados2022@gmail.com"
     admin_pass = "Latoya2019!"
+    # função chamada dentro de app.app_context() para evitar erro de contexto
     admin = User.query.filter_by(email=admin_email).first()
     if not admin:
         u = User(
@@ -298,6 +299,7 @@ def dashboard():
         nome=session.get("nome"),
         hora=datetime.now()
     )
+
 
 # ===========================
 # CLIENTES (FILTRADO POR USUÁRIO)
@@ -487,6 +489,7 @@ def baixar_evidencia(filename):
         filename,
         as_attachment=True
     )
+
 
 # compatibilidade com rota antiga (se você usar download_evidencia)
 @app.route("/download_evidencia/<path:filename>")
@@ -776,7 +779,6 @@ def gerar_relatorio_pdf(resultados, total):
 # ===========================
 # RELATÓRIOS — CONSULTA + PDF (FILTRADO POR USUÁRIO)
 # ===========================
-
 @app.route("/relatorios", methods=["GET", "POST"])
 def relatorios_view():
     if not session.get("usuario_id"):
@@ -914,7 +916,6 @@ def relatorios_view():
     )
 
 
-
 # ===========================
 # CALCULADORA
 # ===========================
@@ -927,6 +928,8 @@ def calculadora_view():
         nome=session.get("nome"),
         hora=datetime.now()
     )
+
+
 # ===========================
 # GERAR PDF DA SIMULAÇÃO
 # ===========================
@@ -1020,32 +1023,15 @@ def request_entity_too_large(error):
     flash("Arquivo muito grande. Limite 10MB.", "danger")
     return redirect(request.referrer or url_for("clientes_view"))
 
-# === CRIAR ADMIN SE NAO EXISTE ===
-from werkzeug.security import generate_password_hash
-admin_email = "credmaisconsignados2022@gmail.com"
-admin_senha = "Latoya2019!"
-
-existe = User.query.filter_by(email=admin_email).first()
-if not existe:
-    novo = User(
-        nome="Admin",
-        email=admin_email,
-        password=generate_password_hash(admin_senha),
-        primeiro_acesso=False,
-        bloqueado=False
-    )
-    db.session.add(novo)
-    db.session.commit()
-    print("### ADMIN CRIADO NO SISTEMA ###")
-else:
-    print("### ADMIN JÁ EXISTE ###")
 
 # ===========================
 # EXECUÇÃO FINAL
 # ===========================
 if __name__ == "__main__":
+    # cria tabelas e garante admin dentro do contexto da app (evita erro de app context)
     with app.app_context():
         db.create_all()
         ensure_admin()
+
     app.run(host="0.0.0.0", port=5000, debug=True)
 
