@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📊 Painel de Controle</h2>
+<p>Acompanhe seus resultados por tipo de produto.</p>
+
+<style>
+/* GRID DOS CARDS DE PRODUTOS */
+.grid-produtos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+
+/* CARD DO PRODUTO */
+.card-produto {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    border-left: 5px solid #2e7d32;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.card-produto h3 {
+    margin: 0;
+    color: #1b5e20;
+}
+
+.card-produto p {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* STATUS */
+.grid-status {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.card-status {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.status-aberto { background: #0277bd; }
+.status-pago { background: #2e7d32; }
+.status-cancelado { background: #c62828; }
+</style>
+
+<!-- ==================== CARDS DE PRODUTOS ==================== -->
+<div class="grid-produtos">
+
+    {% for tipo, valor in produtos.items() %}
+    <div class="card-produto">
+        <h3>{{ tipo }}</h3>
+        <p>{{ valor | fmt }}</p>
+    </div>
+    {% endfor %}
+
+</div>
+
+<!-- ==================== STATUS DOS CONTRATOS ==================== -->
+<h3 style="margin-top:30px;">📌 Status dos Contratos</h3>
+<div class="grid-status">
+
+    <div class="card-status status-aberto">
+        <h3>Em Aberto</h3>
+        <p style="font-size:22px;">{{ em_aberto | fmt }}</p>
+    </div>
+
+    <div class="card-status status-pago">
+        <h3>Pagos</h3>
+        <p style="font-size:22px;">{{ pagos | fmt }}</p>
+    </div>
+
+    <div class="card-status status-cancelado">
+        <h3>Cancelados</h3>
+        <p style="font-size:22px;">{{ cancelados | fmt }}</p>
+    </div>
+
+</div>
+
+{% endblock %}
+
+

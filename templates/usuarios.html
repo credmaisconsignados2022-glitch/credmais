@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>🔑 Usuários</h2>
+
+{% if session.get('email') == 'credmaisconsignados2022@gmail.com' %}
+<!-- Botão principal -->
+<button onclick="abrirCardNovo()" class="btn-novo">+ Usuário</button>
+
+<!-- CARD DE CADASTRO / EDIÇÃO -->
+<div id="cardUsuario" class="card-cadastro">
+  
+  <h3 id="tituloCard">Novo Usuário</h3>
+
+  <form method="POST" action="{{ url_for('salvar_usuario') }}" id="formUsuario">
+
+    <!-- ID oculto para edição -->
+    <input type="hidden" name="id" id="usuarioId">
+
+    <!-- NOME -->
+    <label>Nome:</label>
+    <input type="text" name="nome" id="nome" required>
+
+    <!-- E-MAIL SOMENTE NO MODO EDIÇÃO -->
+    <div id="campoEmail" style="display:none;">
+        <label>E-mail:</label>
+        <input type="email" name="email" id="email">
+    </div>
+
+    <!-- SENHA PROVISÓRIA SOMENTE NO MODO NOVO -->
+    <div id="campoSenhaProv">
+      <label>Senha Provisória:</label>
+      <div style="display:flex;gap:8px;">
+        <input type="text" name="senha_provisoria" id="senha_provisoria" readonly style="flex:1;">
+        <button type="button" class="btn-gerar" onclick="gerarSenha()">Gerar</button>
+      </div>
+    </div>
+
+    <!-- NOVA SENHA SOMENTE NO MODO EDIÇÃO -->
+    <div id="campoNovaSenha" style="display:none;">
+        <label>Nova Senha:</label>
+        <input type="password" name="senha" id="senha">
+    </div>
+
+    <div style="margin-top:12px;display:flex;gap:10px;">
+      <button type="submit" class="btn-salvar">Salvar</button>
+      <button type="button" onclick="fecharCard()" class="btn-cancelar">Cancelar</button>
+    </div>
+
+  </form>
+</div>
+
+
+<!-- TABELA DE USUÁRIOS -->
+<table class="tabela-usuarios">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>E-mail</th>
+      <th>Status</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in usuarios %}
+    <tr>
+      <td>{{ u.nome }}</td>
+      <td>{{ u.email if u.email else '—' }}</td>
+      <td>
+        {% if u.bloqueado %}
+          🚫 Bloqueado
+        {% else %}
+          ✅ Ativo
+        {% endif %}
+      </td>
+      <td>
+
+        <!-- editar -->
+        <button class="btn-acao btn-editar"
+                onclick="editarUsuario('{{ u.id }}', '{{ u.nome }}', '{{ u.email }}')">✏️</button>
+
+        <!-- bloquear / desbloquear -->
+        {% if u.bloqueado %}
+          <a href="{{ url_for('desbloquear_usuario', id=u.id) }}" class="btn-acao btn-desbloquear">🔓</a>
+        {% else %}
+          <a href="{{ url_for('bloquear_usuario', id=u.id) }}" class="btn-acao btn-bloquear">🔒</a>
+        {% endif %}
+
+        <!-- excluir -->
+        <a href="{{ url_for('excluir_usuario', id=u.id) }}"
+           class="btn-acao btn-excluir"
+           onclick="return confirm('Excluir este usuário?')">🗑️</a>
+
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<div class="alerta">
+  <p>🚫 Você não tem permissão para acessar esta área.</p>
+</div>
+{% endif %}
+
+<style>
+.btn-novo {
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:15px;
+  font-weight:600;
+}
+.btn-novo:hover { background:#1b5e20; }
+
+.card-cadastro {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+  display:none;
+}
+.card-cadastro input {
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+.btn-gerar {
+  background:#43a047;
+  border:none;
+  color:#fff;
+  padding:6px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-gerar:hover { background:#2e7d32; }
+
+.btn-salvar {
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-cancelar {
+  background:#ccc;
+  color:black;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.tabela-usuarios {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.tabela-usuarios th, .tabela-usuarios td {
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+.btn-acao {
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:18px;
+  margin-right:5px;
+}
+.btn-editar { color:#1e88e5; }
+.btn-bloquear { color:#f9a825; }
+.btn-desbloquear { color:#43a047; }
+.btn-excluir { color:#c62828; }
+.alerta {
+  padding:20px;
+  background:#ffebee;
+  color:#b71c1c;
+  border-radius:10px;
+  text-align:center;
+  font-weight:600;
+}
+</style>
+
+<script>
+function abrirCardNovo(){
+  document.getElementById('cardUsuario').style.display='block';
+
+  document.getElementById('tituloCard').innerText='Novo Usuário';
+
+  document.getElementById('usuarioId').value='';
+  document.getElementById('nome').value='';
+
+  // mostra senha provisória
+  document.getElementById('campoSenhaProv').style.display='block';
+
+  // esconde campos de edição
+  document.getElementById('campoEmail').style.display='none';
+  document.getElementById('campoNovaSenha').style.display='none';
+
+  document.getElementById('senha_provisoria').value='';
+}
+
+function fecharCard(){
+  document.getElementById('cardUsuario').style.display='none';
+}
+
+function gerarSenha(){
+  const nome = document.getElementById('nome').value.trim();
+  if(!nome){
+    alert('Digite o nome primeiro!');
+    return;
+  }
+  document.getElementById('senha_provisoria').value = nome.split(' ')[0] + '@2025';
+}
+
+function editarUsuario(id, nome, email){
+  document.getElementById('cardUsuario').style.display='block';
+
+  document.getElementById('tituloCard').innerText='Editar Usuário';
+
+  document.getElementById('usuarioId').value=id;
+  document.getElementById('nome').value=nome;
+
+  // e-mail aparece somente para edição
+  document.getElementById('campoEmail').style.display='block';
+  document.getElementById('email').value=email;
+
+  // nova senha aparece somente no modo editar
+  document.getElementById('campoNovaSenha').style.display='block';
+
+  // senha provisória SOMENTE no modo novo
+  document.getElementById('campoSenhaProv').style.display='none';
+}
+</script>
+
+{% endblock %}
+

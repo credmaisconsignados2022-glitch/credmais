@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📈 Relatórios Financeiros</h2>
+<p>Filtre os resultados por período, cliente, vendedor e produto para visualizar ou gerar PDFs.</p>
+
+<!-- FORMULÁRIO SOMENTE PARA CONSULTAR -->
+<form method="POST" action="{{ url_for('relatorios_view') }}" class="form-relatorio">
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+
+    <!-- DATA INICIAL -->
+    <div style="flex:1;min-width:200px;">
+      <label>Data Inicial:</label>
+      <input type="date" name="data_inicio">
+    </div>
+
+    <!-- DATA FINAL -->
+    <div style="flex:1;min-width:200px;">
+      <label>Data Final:</label>
+      <input type="date" name="data_fim">
+    </div>
+
+    <!-- CLIENTE (NOVO CAMPO) -->
+    <div style="flex:1;min-width:220px;">
+      <label>Cliente:</label>
+      <input type="text" name="cliente_nome" placeholder="Digite o nome do cliente">
+    </div>
+
+    <!-- VENDEDOR -->
+    <div style="flex:1;min-width:200px;">
+      <label>Vendedor:</label>
+      <select name="vendedor">
+        <option value="">Todos</option>
+        {% for v in vendedores %}
+          <option value="{{ v.id }}">{{ v.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- PRODUTO -->
+    <div style="flex:1;min-width:200px;">
+      <label>Produto:</label>
+      <select name="produto">
+        <option value="">Todos</option>
+        <option>Cartão</option>
+        <option>Margem Novo</option>
+        <option>Saque Complementar</option>
+        <option>Margem de Aumento 2026</option>
+        <option>Portabilidade</option>
+        <option>FGTS/CLT</option>
+        <option>Refin</option>
+        <option>Governo/Prefeitura</option>
+        <option>Bolsa</option>
+        <option>Empréstimo Pessoal</option>
+      </select>
+    </div>
+
+  </div>
+
+  <div style="margin-top:15px; display:flex; gap:10px;">
+    <button type="submit" name="acao" value="consultar" class="btn-salvar">🔍 Consultar</button>
+  </div>
+
+</form>
+
+<!-- FORMULÁRIO SOMENTE PARA GERAR PDF -->
+<form method="POST" action="{{ url_for('relatorios_view') }}" style="margin-top:10px;">
+    <input type="hidden" name="acao" value="gerar_pdf">
+    <button type="submit" class="btn-salvar" style="background:#1e88e5;">
+      📄 Gerar PDF
+    </button>
+</form>
+
+{% if resultados %}
+<hr>
+<h3>📋 Resultados</h3>
+
+<table class="tabela-clientes">
+  <tr>
+    <th>Cliente</th>
+    <th>CPF</th>
+    <th>Produto</th>
+    <th>Valor</th>
+    <th>Vendedor</th>
+  </tr>
+
+  {% for r in resultados %}
+  <tr>
+    <td>{{ r.nome }}</td>
+    <td>{{ r.cpf }}</td>
+    <td>{{ r.produto }}</td>
+    <td>{{ r.valor | fmt }}</td>
+    <td>
+      {% set vend = vendedores | selectattr("id", "equalto", r.vendedor_id) | list %}
+      {% if vend %}
+        {{ vend[0].nome }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<p style="text-align:right;font-weight:bold;margin-top:10px;">Total: {{ total | fmt }}</p>
+{% endif %}
+
+{% endblock %}
+
+

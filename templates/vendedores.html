@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>👔 Vendedores</h2>
+
+<!-- BOTÃO +VENDEDOR -->
+<button onclick="abrirCard()" class="btn-novo">+ Vendedor</button>
+
+<!-- CARD CADASTRO -->
+<div id="cardVendedor" class="card-cadastro">
+  <h3 id="tituloCard">Novo Vendedor</h3>
+  <form method="POST" action="{{ url_for('vendedores_view') }}" id="formVendedor">
+    <input type="hidden" name="id" id="vendedorId">
+
+    <label>Nome:</label>
+    <input type="text" name="nome" id="nome" required>
+
+    <label>Telefone:</label>
+    <input type="text" name="telefone" id="telefone" placeholder="(11) 99999-9999" required>
+
+    <div style="margin-top:10px;display:flex;gap:10px;">
+      <button type="submit" class="btn-salvar">Salvar</button>
+      <button type="button" onclick="fecharCard()" class="btn-cancelar">Cancelar</button>
+    </div>
+  </form>
+</div>
+
+<!-- LISTA DE VENDEDORES -->
+<table class="tabela-vendedores">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Telefone</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in vendedores %}
+    <tr>
+      <td>{{ v.nome }}</td>
+      <td>{{ v.telefone }}</td>
+      <td>
+        <button class="btn-acao btn-editar" onclick="editarVendedor('{{ v.id }}', '{{ v.nome }}', '{{ v.telefone }}')">✏️</button>
+
+        <!-- CORREÇÃO AQUI -->
+        <a href="{{ url_for('excluir_vendedor', id=v.id) }}" 
+           class="btn-acao btn-excluir" 
+           onclick="return confirm('Excluir vendedor?')">
+          🗑️
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<style>
+.btn-novo {
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:15px;
+  font-weight:600;
+}
+.btn-novo:hover { background:#1b5e20; }
+
+.card-cadastro {
+  background:#fff;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom:25px;
+  display:none;
+}
+.card-cadastro input {
+  width:100%;
+  padding:8px;
+  margin-bottom:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+.btn-salvar {
+  background:#2e7d32; color:white; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;
+}
+.btn-cancelar {
+  background:#ccc; color:black; border:none; padding:8px 14px; border-radius:6px; cursor:pointer;
+}
+.tabela-vendedores {
+  width:100%; border-collapse:collapse; background:white; border-radius:8px; overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.tabela-vendedores th, .tabela-vendedores td {
+  padding:10px; border-bottom:1px solid #eee; text-align:left;
+}
+.btn-acao {
+  background:none; border:none; cursor:pointer; font-size:18px; margin-right:5px;
+}
+.btn-editar { color:#1e88e5; }
+.btn-excluir { color:#c62828; }
+</style>
+
+<script>
+function abrirCard(){
+  document.getElementById('cardVendedor').style.display='block';
+  document.getElementById('tituloCard').innerText='Novo Vendedor';
+  document.getElementById('formVendedor').reset();
+  document.getElementById('vendedorId').value='';
+}
+function fecharCard(){
+  document.getElementById('cardVendedor').style.display='none';
+}
+function editarVendedor(id, nome, telefone){
+  abrirCard();
+  document.getElementById('tituloCard').innerText='Editar Vendedor';
+  document.getElementById('vendedorId').value=id;
+  document.getElementById('nome').value=nome;
+  document.getElementById('telefone').value=telefone;
+}
+</script>
+
+{% endblock %}
+
+

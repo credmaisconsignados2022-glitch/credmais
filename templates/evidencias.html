@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>📎 Evidências do Cliente</h2>
+
+  <div class="card">
+    <h3>{{ cliente.nome }} — {{ cliente.cpf }}</h3>
+    <form method="post" enctype="multipart/form-data">
+      <label for="files">Selecione os arquivos:</label><br>
+      <input type="file" name="files" multiple required>
+      <br><br>
+      <button type="submit" class="btn">Enviar Evidências</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>📂 Arquivos Enviados</h3>
+    {% if evidencias %}
+      <table>
+        <thead>
+          <tr>
+            <th>Arquivo</th>
+            <th>Data de Upload</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ev in evidencias %}
+            <tr>
+              <td>{{ ev.nome_arquivo }}</td>
+              <td>{{ ev.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+              <td>
+                <a href="{{ url_for('evidencias_download', id=ev.id) }}" class="btn" style="background:#0277bd;">Baixar</a>
+                <form method="post" action="{{ url_for('evidencias_delete', id=ev.id) }}" style="display:inline;">
+                  <button class="btn" style="background:#c62828;">Excluir</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Nenhuma evidência enviada ainda.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <a href="{{ url_for('clientes_view') }}" class="btn" style="background:#2e7d32;">⬅️ Voltar para Clientes</a>
+  </div>
+{% endblock %}

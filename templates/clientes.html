@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>👥 Clientes</h2>
+
+<!-- 🔍 PESQUISA POR CPF -->
+<form method="GET" action="{{ url_for('buscar_cliente') }}" style="margin-bottom:15px;display:flex;gap:10px;">
+    <input type="text" name="cpf" placeholder="Pesquisar CPF..." style="flex:1;padding:6px;">
+    <button class="btn-salvar">🔎 Buscar</button>
+</form>
+
+<button onclick="abrirCard()" class="btn-novo">+ Cliente</button>
+
+<div id="cardCliente" class="card-cadastro">
+  <h3 id="tituloCard">Novo Cliente</h3>
+  <form method="POST" enctype="multipart/form-data" id="formCliente" action="{{ url_for('salvar_cliente') }}">
+    <input type="hidden" name="id" id="clienteId">
+
+    <label>Nome do Cliente:</label>
+    <input type="text" name="nome" id="nome" required>
+
+    <label>CPF:</label>
+    <input type="text" name="cpf" id="cpf" required>
+
+    <label>Telefone:</label>
+    <div style="display:flex;align-items:center;gap:5px;">
+      <input type="text" name="telefone" id="telefone" placeholder="(11) 99999-9999" oninput="atualizarWhats()">
+      <a id="linkWhats" target="_blank" class="btn-whats" style="display:none;">💬</a>
+    </div>
+
+    <label>Produto:</label>
+    <select name="produto" id="produto" required>
+      <option value="">Selecione</option>
+      <option>Cartão</option>
+      <option>Margem Novo</option>
+      <option>Saque Complementar</option>
+      <option>Margem de Aumento 2026</option>
+      <option>Portabilidade</option>
+      <option>FGTS/CLT</option>
+      <option>Refin</option>
+      <option>Governo/Prefeitura</option>
+      <option>Bolsa</option>
+      <option>Empréstimo Pessoal</option>
+    </select>
+
+    <label>Valor Vendido:</label>
+    <input type="number" name="valor" id="valor" step="0.01" required>
+
+    <label>Vendedor:</label>
+    <select name="vendedor" id="vendedor" required>
+      <option value="">Selecione</option>
+      {% for v in vendedores %}
+        <option value="{{ v.id }}">{{ v.nome }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Status do Contrato:</label>
+    <select name="status_contrato" id="status_contrato" required>
+      <option>Em Aberto</option>
+      <option>Pago</option>
+      <option>Cancelado</option>
+    </select>
+
+    <label>Status de Formalização:</label>
+    <select name="status_formalizacao" id="status_formalizacao" required>
+      <option value="Não Formalizado">Não Formalizado</option>
+      <option value="Concluído">Concluído</option>
+    </select>
+
+    <label>Status Comissão:</label>
+    <select name="status_comissao" id="status_comissao" required>
+      <option>A Pagar</option>
+      <option>Paga</option>
+    </select>
+
+    <div style="margin-top:10px;display:flex;gap:10px;">
+      <button type="submit" class="btn-salvar">Salvar</button>
+      <button type="button" onclick="fecharCard()" class="btn-cancelar">Cancelar</button>
+    </div>
+  </form>
+</div>
+
+<table class="tabela-clientes">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>CPF</th>
+      <th>Telefone</th>
+      <th>Produto</th>
+      <th>Valor</th>
+      <th>Vendedor</th>
+      <th>Status Contrato</th>
+      <th>Formalização</th>
+      <th>Comissão</th>
+      <th>Evidências</th>
+      <th>Ações</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for c in clientes %}
+    <tr>
+
+      <td>{{ c.nome }}</td>
+      <td>{{ c.cpf }}</td>
+      <td>{{ c.telefone }}</td>
+      <td>{{ c.produto }}</td>
+      <td>{{ c.valor | fmt }}</td>
+
+      <td>
+        {% set vendedor = vendedores|selectattr("id","equalto",c.vendedor_id)|list %}
+        {% if vendedor %}
+          {{ vendedor[0].nome }}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+
+      <!-- STATUS CONTRATO -->
+      <td>
+        {% if c.status_contrato == "Pago" %}
+          <span style="color:#2e7d32; font-weight:bold;">{{ c.status_contrato }}</span>
+        {% elif c.status_contrato == "Cancelado" %}
+          <span style="color:#c62828; font-weight:bold;">{{ c.status_contrato }}</span>
+        {% else %}
+          <span style="color:#f9a825; font-weight:bold;">{{ c.status_contrato }}</span>
+        {% endif %}
+      </td>
+
+      <!-- FORMALIZAÇÃO -->
+      <td>
+        {% if c.status_formalizacao == 'Concluído' %}
+          ✔️
+        {% else %}
+          ❌
+        {% endif %}
+      </td>
+
+      <!-- COMISSÃO -->
+      <td>
+        {% if c.status_comissao == "Paga" %}
+          <span style="color:#2e7d32; font-weight:bold;">Paga</span>
+        {% else %}
+          <span style="color:#1565c0; font-weight:bold;">A Pagar</span>
+        {% endif %}
+      </td>
+
+      <!-- EVIDÊNCIAS EM CAIXA RETRÁTIL -->
+      <td>
+
+        <button class="btn-acao btn-download" onclick="toggleEvidencias('{{ c.id }}')">
+          📁 Ver Evidências
+        </button>
+
+        <div id="evidencias_{{ c.id }}" class="box-evidencias" style="display:none; margin-top:8px;">
+
+            {% if c.evidencias|length == 0 %}
+              <p style="font-size:12px;color:#777;">Nenhum arquivo enviado.</p>
+            {% else %}
+              {% for ev in c.evidencias %}
+                <div class="linha-evidencia">
+                    <a href="{{ url_for('baixar_evidencia', filename=ev.arquivo) }}" class="ev-link">
+                      📎 {{ ev.arquivo[:20] }}...
+                    </a>
+
+                    <a href="{{ url_for('excluir_evidencia', id=ev.id) }}"
+                       class="ev-del"
+                       onclick="return confirm('Excluir este arquivo?')">
+                      ❌
+                    </a>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+        </div>
+
+      </td>
+
+      <td>
+        <a href="https://wa.me/55{{ c.telefone|replace(' ','')|replace('-','')|replace('(','')|replace(')','') }}"
+           target="_blank" class="btn-acao btn-whats">💬</a>
+
+        <button class="btn-acao btn-editar"
+          onclick="
+            editarCliente(
+              '{{ c.id }}',
+              '{{ c.nome }}',
+              '{{ c.cpf }}',
+              '{{ c.telefone }}',
+              '{{ c.produto }}',
+              '{{ c.valor }}',
+              '{{ c.status_contrato }}',
+              '{{ c.status_formalizacao }}',
+              '{{ c.status_comissao }}',
+              '{{ c.vendedor_id or '' }}'
+            )
+        ">✏️</button>
+
+        <a href="{{ url_for('excluir_cliente', id=c.id) }}"
+           class="btn-acao btn-excluir"
+           onclick="return confirm('Excluir cliente?')">🗑️</a>
+
+        <!-- UPLOAD MÚLTIPLO -->
+        <form action="{{ url_for('upload_evidencia', id=c.id) }}" method="POST" enctype="multipart/form-data" style="display:inline;">
+          <label class="btn-acao btn-upload">📎
+            <input type="file" name="arquivo" multiple style="display:none;" onchange="this.form.submit()">
+          </label>
+        </form>
+
+      </td>
+
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<style>
+.btn-novo{
+  background:#2e7d32;color:white;border:none;padding:10px 15px;border-radius:6px;
+  cursor:pointer;margin-bottom:15px;font-weight:600;
+}
+.btn-novo:hover{background:#1b5e20;}
+
+.card-cadastro{
+  background:#fff;padding:20px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom:25px;display:none;
+}
+.card-cadastro input, .card-cadastro select{
+  width:100%;padding:8px;margin-bottom:10px;border:1px solid #ccc;border-radius:6px;
+}
+
+.box-evidencias{
+  background:#f5f5f5;
+  padding:10px;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+.linha-evidencia{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+
+.ev-link{
+  color:#00796b;
+  text-decoration:none;
+  font-size:14px;
+}
+.ev-del{
+  color:#c62828;
+  font-size:16px;
+  text-decoration:none;
+}
+
+.btn-salvar{background:#2e7d32;color:white;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;}
+.btn-cancelar{background:#ccc;color:black;border:none;padding:8px 14px;border-radius:6px;cursor:pointer;}
+
+.tabela-clientes{
+  width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.tabela-clientes th, .tabela-clientes td{padding:10px;border-bottom:1px solid #eee;text-align:left;}
+
+.btn-acao{background:none;border:none;cursor:pointer;font-size:18px;margin-right:5px;}
+.btn-whats{color:#25d366;}
+.btn-editar{color:#1e88e5;}
+.btn-excluir{color:#c62828;}
+.btn-upload{color:#6a1b9a;}
+.btn-download{color:#00796b;}
+</style>
+
+<script>
+function abrirCard(){
+  document.getElementById('cardCliente').style.display='block';
+  document.getElementById('tituloCard').innerText='Novo Cliente';
+  document.getElementById('formCliente').reset();
+  document.getElementById('linkWhats').style.display='none';
+}
+
+function fecharCard(){
+  document.getElementById('cardCliente').style.display='none';
+}
+
+function editarCliente(id,nome,cpf,telefone,produto,valor,status_contrato,status_formalizacao,status_comissao,vendedor){
+  abrirCard();
+  document.getElementById('tituloCard').innerText='Editar Cliente';
+  document.getElementById('clienteId').value=id;
+  document.getElementById('nome').value=nome;
+  document.getElementById('cpf').value=cpf;
+  document.getElementById('telefone').value=telefone;
+  document.getElementById('produto').value=produto;
+  document.getElementById('valor').value=valor;
+  document.getElementById('status_contrato').value=status_contrato;
+  document.getElementById('status_formalizacao').value=status_formalizacao;
+  document.getElementById('status_comissao').value=status_comissao;
+  document.getElementById('vendedor').value=vendedor;
+  atualizarWhats();
+}
+
+function atualizarWhats(){
+  const tel=document.getElementById('telefone').value.replace(/\D/g,'');
+  const link=document.getElementById('linkWhats');
+  if(tel.length>=10){
+    link.href=`https://wa.me/55${tel}`;
+    link.style.display='inline';
+  }else link.style.display='none';
+}
+
+function toggleEvidencias(id){
+  let box = document.getElementById("evidencias_" + id);
+  box.style.display = (box.style.display === "none") ? "block" : "none";
+}
+</script>
+
+{% endblock %}
+
+
