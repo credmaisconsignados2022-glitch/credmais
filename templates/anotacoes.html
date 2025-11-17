@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📝 Minhas Anotações</h2>
+
+<a href="{{ url_for('anotacoes_nova') }}" class="btn-novo">+ Nova Anotação</a>
+
+<table class="tabela-usuarios">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Criado em</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for a in anotacoes %}
+        <tr>
+            <td>{{ a.titulo }}</td>
+            <td>{{ a.criado_em.strftime("%d/%m/%Y %H:%M") }}</td>
+            <td>
+                <a class="btn-acao btn-editar" href="{{ url_for('anotacoes_abrir', id=a.id) }}">📄 Abrir</a>
+                <a class="btn-acao btn-editar" href="{{ url_for('anotacoes_editar', id=a.id) }}">✏️ Editar</a>
+                <a class="btn-acao btn-excluir" href="{{ url_for('excluir_anotacao', id=a.id) }}"
+                   onclick="return confirm('Excluir esta anotação?')">🗑️ Excluir</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<style>
+.btn-novo {
+  background:#2e7d32;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:6px;
+  cursor:pointer;
+  margin-bottom:15px;
+  display:inline-block;
+  text-decoration:none;
+  font-weight:600;
+}
+.btn-novo:hover { background:#1b5e20; }
+
+.tabela-usuarios {
+  width:100%;
+  background:white;
+  border-radius:8px;
+  overflow:hidden;
+  border-collapse:collapse;
+  box-shadow:0 1px 6px rgba(0,0,0,0.08);
+}
+.tabela-usuarios th, .tabela-usuarios td {
+  padding:10px;
+  border-bottom:1px solid #eee;
+  text-align:left;
+}
+
+.btn-acao {
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+  margin-right:8px;
+  text-decoration:none;
+}
+.btn-editar { color:#1e88e5; }
+.btn-excluir { color:#c62828; }
+</style>
+
+{% endblock %}

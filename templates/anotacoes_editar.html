@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>✏️ Editar Anotação</h2>
+
+<form method="POST" action="{{ url_for('salvar_anotacao') }}" class="form-box">
+
+    <input type="hidden" name="id" value="{{ anotacao.id }}">
+
+    <label>Título:</label>
+    <input type="text" name="titulo" value="{{ anotacao.titulo }}" required>
+
+    <label>Conteúdo:</label>
+    <textarea name="texto" rows="12" required>{{ anotacao.texto }}</textarea>
+
+    <button class="btn-salvar">Salvar alterações</button>
+    <a href="{{ url_for('anotacoes_view') }}" class="btn-cancelar">Cancelar</a>
+</form>
+
+<style>
+.form-box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 1px 6px rgba(0,0,0,0.1);
+}
+
+.form-box input, .form-box textarea {
+  width:100%;
+  padding:10px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  margin-bottom:12px;
+}
+
+.btn-salvar {
+  background:#1e88e5;
+  color:white;
+  padding:10px 18px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.btn-cancelar {
+  background:#ccc;
+  padding:10px 18px;
+  color:black;
+  text-decoration:none;
+  border-radius:6px;
+  margin-left:10px;
+}
+</style>
+
+{% endblock %}

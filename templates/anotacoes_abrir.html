@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>📄 Anotação</h2>
+
+<div class="view-box">
+
+    <h3>{{ anotacao.titulo }}</h3>
+
+    <p class="data">Criada em: {{ anotacao.criado_em.strftime("%d/%m/%Y %H:%M") }}</p>
+
+    <div class="texto">{{ anotacao.texto | nl2br }}</div>
+
+    <br>
+
+    <a class="btn-editar" href="{{ url_for('anotacoes_editar', id=anotacao.id) }}">✏️ Editar</a>
+    <a class="btn-voltar" href="{{ url_for('anotacoes_view') }}">Voltar</a>
+
+</div>
+
+<style>
+.view-box {
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 1px 6px rgba(0,0,0,0.1);
+}
+.view-box h3 { margin-top:0; }
+
+.texto {
+  white-space:pre-wrap;
+  padding:10px;
+  background:#fafafa;
+  border-radius:6px;
+  border:1px solid #ddd;
+}
+
+.btn-editar {
+  background:#1e88e5;
+  padding:10px 16px;
+  color:white;
+  border-radius:6px;
+  text-decoration:none;
+}
+.btn-voltar {
+  background:#777;
+  padding:10px 16px;
+  color:white;
+  border-radius:6px;
+  margin-left:10px;
+  text-decoration:none;
+}
+.data { color:#777; font-size:13px; }
+</style>
+
+{% endblock %}
