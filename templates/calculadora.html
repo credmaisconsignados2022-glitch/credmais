@@ -34,10 +34,10 @@
         <h3>🪙 Cartão Consignado</h3>
 
         <label>Salário / Parcela (R$):</label>
-        <input type="number" step="0.01" id="valor_pagamento_cartao">
+        <input type="number" step="0.01" id="valor_pagamento_cartao" name="valor_pagamento">
 
         <label>Multiplicador:</label>
-        <input type="number" step="0.01" id="multiplicador_cartao">
+        <input type="number" step="0.01" id="multiplicador_cartao" name="multiplicador_cartao">
 
         <div style="margin-top:8px;">
           <button type="button" class="btn btn-warning" onclick="simularCartao()">💡 Simular Cartão</button>
@@ -48,20 +48,20 @@
       </div>
 
       <!-- AUMENTO 2026 -->
-      <div class="card" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:6px;">
+      <<div class="card" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:6px;">
         <h3>📈 Aumento de Margem 2026</h3>
 
         <label>Salário Atual:</label>
-        <input type="number" step="0.01" id="salario_atual">
+        <input type="number" step="0.01" id="salario_atual" name="salario_atual">
 
         <label>% de Aumento:</label>
-        <input type="number" step="0.01" id="percentual_aumento">
+        <input type="number" step="0.01" id="percentual_aumento" name="aumento_percent">
 
         <label>Multiplicador:</label>
-        <input type="number" step="0.01" id="multiplicador_margem">
+        <input type="number" step="0.01" id="multiplicador_margem" name="multiplicador_margem">
 
         <label>Prazo (opcional):</label>
-        <input type="text" id="prazo">
+        <input type="text" id="prazo" name="prazo">
 
         <div style="margin-top:8px;">
           <button type="button" class="btn btn-warning" onclick="simularMargem()">💡 Simular Margem</button>
@@ -95,7 +95,6 @@ function simularCartao(){
   const saque = limite * 0.7;
   const cartao = limite * 0.3;
 
-  // MOSTRA NA TELA
   document.getElementById("resultado_cartao").innerHTML = `
     <div><b>Margem:</b> R$ ${formatBR(margem)}</div>
     <div><b>Limite:</b> R$ ${formatBR(limite)}</div>
@@ -104,7 +103,6 @@ function simularCartao(){
   `;
   document.getElementById("resultado_cartao").style.display="block";
 
-  // SALVA NOS HIDDENS PARA O PDF
   document.getElementById("margem_cartao").value = margem;
   document.getElementById("limite_cartao").value = limite;
   document.getElementById("saque_cartao").value = saque;
@@ -121,7 +119,6 @@ function simularMargem(){
   const margem = aumento * 0.35;
   const valor = margem * (multi || 1);
 
-  // MOSTRA NA TELA
   document.getElementById("resultado_margem").innerHTML = `
     <div><b>Novo Salário:</b> R$ ${formatBR(novoSal)}</div>
     <div><b>Aumento:</b> R$ ${formatBR(aumento)}</div>
@@ -130,7 +127,6 @@ function simularMargem(){
   `;
   document.getElementById("resultado_margem").style.display="block";
 
-  // SALVA NOS HIDDENS PARA PDF
   document.getElementById("novo_salario").value = novoSal;
   document.getElementById("aumento_margem").value = aumento;
   document.getElementById("margem_nova").value = margem;
@@ -153,3 +149,4 @@ function submitPdf(tipo){
 }
 </script>
 {% endblock %}
+
